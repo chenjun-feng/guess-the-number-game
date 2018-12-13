@@ -3,20 +3,21 @@ package academy.learnprogramming;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+@Component
 public class GameImpl implements Game {
 
     // == constants ==
-    private final static Logger log = LoggerFactory.getLogger(Game.class);
+    private final static Logger log = LoggerFactory.getLogger(GameImpl.class);
 
     // == fields ==
-    @Autowired
-    private NumberGenerator numberGenerator;
+    private final NumberGenerator numberGenerator;
+    private final int guessCount;
 
-    private int guessCount = 10;
     private int number;
     private int guess;
     private int smallest;
@@ -24,12 +25,21 @@ public class GameImpl implements Game {
     private int remainingGuesses;
     private boolean validNumberRange = true;
 
+    public GameImpl(NumberGenerator numberGenerator, @GuessCount int guessCount) {
+        this.numberGenerator = numberGenerator;
+        this.guessCount = guessCount;
+    }
+
+    // == constructor ==
+    @Autowired
+
+
     // == init ==
     @PostConstruct
     @Override
     public void reset() {
-        smallest = 0;
-        guess = 0;
+        smallest = numberGenerator.getMinNumber();
+        guess = numberGenerator.getMinNumber(); // initial setup of the guess value
         remainingGuesses = guessCount;
         biggest = numberGenerator.getMaxNumber();
         number = numberGenerator.next();
@@ -78,7 +88,15 @@ public class GameImpl implements Game {
     }
 
     @Override
+    public int getGuessCount() {
+        return guessCount;
+    }
+
+    @Override
     public void check() {
+
+        checkValidNumberRange();
+
         if (validNumberRange) {
             if (guess > number) biggest = guess - 1;
             if (guess < number) smallest = guess + 1;
@@ -103,7 +121,7 @@ public class GameImpl implements Game {
     }
 
     // == private method ==
-    private void checkValidNumber() {
+    private void checkValidNumberRange() {
         validNumberRange = (guess >= smallest) && (guess <= biggest);
     }
 }
